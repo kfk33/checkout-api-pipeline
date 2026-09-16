@@ -1,6 +1,13 @@
 name: Validate Incident Runbook
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'RUNBOOK-checkout-api-oom.md'
+      - 'POSTMORTEM-checkout-api-oom.md'
+
   workflow_dispatch:
     inputs:
       runbook_file:
