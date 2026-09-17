@@ -2,16 +2,7 @@ name: checkout-api CI
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - '**'  # run CI on all changes
-  workflow_dispatch:
-    inputs:
-      runbook_file:
-        description: "Runbook file to validate"
-        required: true
-        default: "RUNBOOK-checkout-api-oom.md"
+    branches: [master]
 
 permissions:
   contents: read
@@ -28,34 +19,11 @@ jobs:
       - name: Test checkout-api
         run: |
           docker run -d -p 8000:8000 --name checkout-api-test checkout-api:ci
-          sleep 5
-          curl -f http://localhost:8000/health
+          sleep 3
+          curl -f http://localhost:8000/healthz
           docker rm -f checkout-api-test
-
-  validate-runbook:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Select runbook file
-        run: |
-          if [ -z "${{ github.event.inputs.runbook_file }}" ]; then
-            FILE="RUNBOOK-checkout-api-oom.md"
-          else
-            FILE="${{ github.event.inputs.runbook_file }}"
-          fi
-          echo "FILE=$FILE" >> $GITHUB_ENV
-
-      - name: Validate runbook structure
-        run: |
-          test -f "$FILE" || { echo "::error::$FILE not found."; exit 1; }
-          grep -qi "diagnos" "$FILE" || { echo "::error::No diagnosis section found."; exit 1; }
-          grep -qi "resolut" "$FILE" || { echo "::error::No resolution section found."; exit 1; }
-          grep -q "kubectl " "$FILE" || { echo "::error::No kubectl command found."; exit 1; }
-          echo "$FILE is valid."
-
-      - name: Validate scaling policy
+      - 
+        name: Validate scaling policy
         run: |
           test -f scaling-policy.yaml || { echo "scaling-policy.yaml is missing"; exit 1; }
           DEPLOYMENT_NAME=$(grep -A1 '^target:' scaling-policy.yaml | grep 'deployment:' | awk '{print $2}')

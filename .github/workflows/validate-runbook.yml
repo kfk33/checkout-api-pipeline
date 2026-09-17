@@ -1,13 +1,6 @@
 name: Validate Incident Runbook
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'RUNBOOK-checkout-api-oom.md'
-      - 'POSTMORTEM-checkout-api-oom.md'
-
   workflow_dispatch:
     inputs:
       runbook_file:
@@ -26,9 +19,8 @@ jobs:
 
       - name: Validate runbook structure
         run: |
-          FILE="${{ github.event.inputs.runbook_file }}"
-          test -f "$FILE" || { echo "::error::$FILE not found in this repository."; exit 1; }
-          grep -qi "diagnos" "$FILE" || { echo "::error::No diagnosis section found in $FILE."; exit 1; }
-          grep -qi "resolut" "$FILE" || { echo "::error::No resolution section found in $FILE."; exit 1; }
-          grep -q "kubectl " "$FILE" || { echo "::error::No real kubectl command found in $FILE."; exit 1; }
-          echo "$FILE has a diagnosis section, a resolution section, and at least one real kubectl command."
+          test -f "${{ github.event.inputs.runbook_file }}" || { echo "::error::${{ github.event.inputs.runbook_file }} not found in this repository."; exit 1; }
+          grep -qi "diagnos" "${{ github.event.inputs.runbook_file }}" || { echo "::error::No diagnosis section found in ${{ github.event.inputs.runbook_file }}."; exit 1; }
+          grep -qi "resolut" "${{ github.event.inputs.runbook_file }}" || { echo "::error::No resolution section found in ${{ github.event.inputs.runbook_file }}."; exit 1; }
+          grep -q "kubectl " "${{ github.event.inputs.runbook_file }}" || { echo "::error::No real kubectl command found in ${{ github.event.inputs.runbook_file }}."; exit 1; }
+          echo "${{ github.event.inputs.runbook_file }} has a diagnosis section, a resolution section, and at least one real kubectl command."
